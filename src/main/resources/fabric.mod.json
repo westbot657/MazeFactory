@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "mazefactory",
+  "version": "${version}",
+  "name": "MazeFactory",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/mazefactory/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-datagen": [
+      "io.github.westbot.mazefactory.client.MazefactoryDataGenerator"
+    ],
+    "client": [
+      "io.github.westbot.mazefactory.client.MazefactoryClient"
+    ],
+    "main": [
+      "io.github.westbot.mazefactory.Mazefactory"
+    ]
+  },
+  "mixins": [
+    "mazefactory.mixins.json",
+    {
+      "config": "mazefactory.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
