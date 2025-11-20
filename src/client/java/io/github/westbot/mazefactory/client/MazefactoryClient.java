@@ -58,14 +58,14 @@ public class MazefactoryClient implements ClientModInitializer {
         }
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (mazeRenderToggle.isDown()) {
+            if (mazeRenderToggle.consumeClick()) {
                 renderMaze = !renderMaze;
-                while (mazeRenderToggle.isDown());
+                while (mazeRenderToggle.consumeClick());
             }
 
-            if (mazeDepthTestToggle.isDown()) {
+            if (mazeDepthTestToggle.consumeClick()) {
                 mazeDepth = !mazeDepth;
-                while (mazeDepthTestToggle.isDown());
+                while (mazeDepthTestToggle.consumeClick());
             }
 
         });
