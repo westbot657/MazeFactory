@@ -4,6 +4,9 @@ import com.google.gson.JsonObject;
 import io.github.westbot.mazefactory.Mazefactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.joml.Vector2i;
 
 import javax.imageio.ImageIO;
@@ -18,6 +21,12 @@ public class Maze {
         EMPTY,
         PARTIAL,
         DONE,
+    }
+
+    public enum MazePart {
+        WALL,
+        FLOOR,
+        SOLUTION_NODE,
     }
 
     public static final int BLACK = 0xFF000000;
@@ -79,11 +88,34 @@ public class Maze {
         }
 
         image.setRGB(x, z, color);
-        changes++;
+        // changes++;
 
-        if (changes > 25) save();
+        // if (changes > 25) save();
 
     }
+
+    public MazePart getCellType(int x, int z) {
+        int color = image.getRGB(x, z);
+
+        // WALL colors
+        if (color == BLACK || color == YELLOW || color == GREEN) {
+            return MazePart.WALL;
+        }
+
+        // FLOOR colors
+        if (color == WHITE || color == LIGHT_GRAY || color == BLUE) {
+            return MazePart.FLOOR;
+        }
+
+        // SOLUTION_NODE colors
+        if (color == RED_1 || color == RED_2) {
+            return MazePart.SOLUTION_NODE;
+        }
+
+        // fallback if color is unknown
+        return null;
+    }
+
 
     public int getCellColor(int x, int z) {
         if (x < 0 || x >= size.x || z < 0 || z >= size.y) return 0xFF880000;
@@ -106,6 +138,46 @@ public class Maze {
         } catch (IOException e) {
             Mazefactory.LOGGER.error("Failed to save maze image", e);
         }
+    }
+
+    public boolean isMazeBlock(BlockState state) {
+        return state.is(Blocks.OBSIDIAN) || state.is(Blocks.CRYING_OBSIDIAN) || state.is(Blocks.BEDROCK);
+    }
+
+    public void updateBlock(BlockPos pos, BlockState state) {
+        if (isBlockInMap(pos)) {
+            var tilePos = getTilePosition(pos);
+            var tileType = getCellType(tilePos.x, tilePos.y);
+
+            var level = Minecraft.getInstance().level;
+            assert level != null;
+
+            var top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, pos);
+            var st  = level.getBlockState(top.below());
+            var st1 = level.getBlockState(top.below().below());
+            var st2 = level.getBlockState(top.below().below().below());
+
+            CellState newState;
+            if (tileType == MazePart.FLOOR || tileType == MazePart.SOLUTION_NODE) {
+                if (isMazeBlock(st)) {
+                    newState = CellState.DONE;
+                } else {
+                    newState = CellState.EMPTY;
+                }
+            } else {
+                if (!isMazeBlock(st)) {
+                    newState = CellState.EMPTY;
+                } else if (!isMazeBlock(st1) || !isMazeBlock(st2)) {
+                    newState = CellState.PARTIAL;
+                } else {
+                    newState = CellState.DONE;
+                }
+            }
+
+            setCell(tilePos.x, tilePos.y, newState);
+
+        }
+
     }
 
 }

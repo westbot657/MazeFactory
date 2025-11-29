@@ -77,8 +77,7 @@ public class MazeRenderer {
         var world = ctx.world();
         var cam = ctx.camera().getPosition();
 
-        if (builder == null)
-            builder = new BufferBuilder(ALLOCATOR, VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+        builder = new BufferBuilder(ALLOCATOR, VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
 
         var camX = cam.x;
         var camY = cam.y;
@@ -97,7 +96,7 @@ public class MazeRenderer {
                         int x = SectionPos.sectionToBlockCoord(cpos.x, cx);
                         int z = SectionPos.sectionToBlockCoord(cpos.z, cz);
 
-                        int y = world.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                        int y = world.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
                         float fy = y + 0.05f;
 
                         var bp = new BlockPos(x, y, z);
@@ -141,7 +140,13 @@ public class MazeRenderer {
     private static void draw(WorldRenderContext ctx) {
         if (builder == null) return;
 
-        MeshData mesh = builder.build();
+        MeshData mesh;
+        try {
+            mesh = builder.build();
+        } catch (Exception e) {
+            builder = null;
+            return;
+        }
         if (mesh == null) return;
 
         var format = mesh.drawState().format();

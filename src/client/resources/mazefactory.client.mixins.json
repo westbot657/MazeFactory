@@ -4,6 +4,7 @@
   "package": "io.github.westbot.mazefactory.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "ClientPacketListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

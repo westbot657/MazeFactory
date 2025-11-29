@@ -12,12 +12,18 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.*;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.joml.Vector2i;
 
 import java.io.File;
@@ -49,7 +55,6 @@ public class MazefactoryClient implements ClientModInitializer {
         MazeRenderer.init();
 
         ClientChunkEvents.CHUNK_LOAD.register(MazefactoryClient::updateChunk);
-
 
         if (configFile.exists() && configFile.isFile()) {
             try {
@@ -84,7 +89,24 @@ public class MazefactoryClient implements ClientModInitializer {
     }
 
     private static void updateChunk(ClientLevel level, LevelChunk chunk) {
+        if (maze != null) {
 
+            int minX = chunk.getPos().getMinBlockX();
+            int minZ = chunk.getPos().getMinBlockZ();
+            int maxX = minX + 15;
+            int maxZ = minZ + 15;
+
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
+
+                    if (!maze.isBlockInMap(new BlockPos(x, 0, z))) continue;
+
+                    BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(x, 0, z));
+                    BlockState st = level.getBlockState(top);
+                    maze.updateBlock(top, st);
+                }
+            }
+        }
     }
 
     private int loadMaze(CommandContext<FabricClientCommandSource> context) {
