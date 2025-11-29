@@ -37,13 +37,14 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 public class MazefactoryClient implements ClientModInitializer {
 
     public static final KeyMapping mazeRenderToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.mazefactory.toggle_render", InputConstants.Type.KEYSYM, InputConstants.KEY_Z, "category.mazefactory.bindings"));
+    public static final KeyMapping mazeDualHeightToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.mazefactory.toggle_double", InputConstants.Type.KEYSYM, InputConstants.KEY_RBRACKET, "category.mazefactory.bindings"));
 
     public static final KeyMapping mazeDepthTestToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.mazefactory.toggle_depth_test", InputConstants.Type.KEYSYM, InputConstants.KEY_X, "category.mazefactory.bindings"));
 
     public static Maze maze;
 
     public static boolean renderMaze = true;
-
+    public static boolean renderPlayerY = true;
     public static boolean mazeDepth = true;
 
 
@@ -80,6 +81,11 @@ public class MazefactoryClient implements ClientModInitializer {
             if (mazeDepthTestToggle.consumeClick()) {
                 mazeDepth = !mazeDepth;
                 while (mazeDepthTestToggle.consumeClick());
+            }
+
+            if (mazeDualHeightToggle.consumeClick()) {
+                renderPlayerY = !renderPlayerY;
+                while (mazeDualHeightToggle.consumeClick());
             }
 
         });

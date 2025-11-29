@@ -20,9 +20,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
-import org.joml.Vector3f;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -31,11 +29,9 @@ public class MazeRenderer {
 
     private static final int CHUNK_DIST = 2;
 
-    // your tweakable settings
     public static float quadSize = 0.8f;
     public static float quadOpacity = 0.5f;
 
-    // Fabric doc–style allocator + ring buffer
     private static final ByteBufferBuilder ALLOCATOR = new ByteBufferBuilder(RenderType.SMALL_BUFFER_SIZE);
     private static MappableRingBuffer vertexRing;
 
@@ -44,9 +40,7 @@ public class MazeRenderer {
 
     private static BufferBuilder builder;
 
-    /** Must be called from ClientModInitializer */
     public static void init() {
-        // Create pipelines using Fabric 1.21 style
         pipelineDepthOn = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(Mazefactory.id("maze_depth_on"))
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
@@ -72,7 +66,6 @@ public class MazeRenderer {
         draw(ctx);
     }
 
-    // ---------------------- EXTRACTION STEP ----------------------------
     private static void extract(WorldRenderContext ctx, Maze maze) {
         var world = ctx.world();
         var cam = ctx.camera().getPosition();
@@ -84,6 +77,10 @@ public class MazeRenderer {
         var camZ = cam.z;
 
         BlockPos camPos = BlockPos.containing(camX, 0, camZ);
+
+        var playerPos = Minecraft.getInstance().player.blockPosition();
+
+        var playerTop = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, playerPos);
 
         for (int dx = -CHUNK_DIST; dx <= CHUNK_DIST; dx++) {
             for (int dz = -CHUNK_DIST; dz <= CHUNK_DIST; dz++) {
@@ -118,8 +115,14 @@ public class MazeRenderer {
                         float ry = fy - (float) camY;
                         float rz = z - (float) camZ;
 
-                        // two triangles
-                        addQuad(rx + 0.5f, ry, rz + 0.5f, half, col);
+                        float ry2 = ((float) playerTop.getY()) + 0.05f - ((float) camY);
+
+                        if (!MazefactoryClient.renderPlayerY || ry2 < ry) {
+                            addQuad(rx + 0.5f, ry, rz + 0.5f, half, col);
+                        }
+                        if (MazefactoryClient.renderPlayerY) {
+                            addQuad(rx + 0.5f, ry2, rz + 0.5f, half, col);
+                        }
                     }
                 }
             }
@@ -136,7 +139,6 @@ public class MazeRenderer {
         builder.addVertex(x + h, y, z - h).setColor(col);
     }
 
-    // ---------------------- DRAW STEP ---------------------------------
     private static void draw(WorldRenderContext ctx) {
         if (builder == null) return;
 
@@ -190,7 +192,6 @@ public class MazeRenderer {
 
             pass.setVertexBuffer(0, slice.buffer());
 
-            // autogen indices
             RenderSystem.AutoStorageIndexBuffer sib =
                 RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES);
             pass.setIndexBuffer(sib.getBuffer(mesh.drawState().indexCount()), sib.type());
