@@ -86,7 +86,8 @@ public class Maze {
     }
 
     public int getCellColor(int x, int z) {
-        if (x < 0 || x >= size.x || z < 0 || z >= size.y) return 0;
+        if (x < 0 || x >= size.x || z < 0 || z >= size.y) return 0xFF880000;
+        if (image == null) return 0xFF880000;
         return image.getRGB(x, z);
     }
 

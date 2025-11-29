@@ -6,14 +6,18 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import io.github.westbot.mazefactory.Mazefactory;
+import io.github.westbot.mazefactory.client.render.MazeRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.*;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.joml.Vector2i;
 
 import java.io.File;
@@ -41,6 +45,11 @@ public class MazefactoryClient implements ClientModInitializer {
     public void onInitializeClient() {
 
         var configFile = new File(Minecraft.getInstance().gameDirectory.getAbsolutePath() + "/mazeconfig.json");
+
+        MazeRenderer.init();
+
+        ClientChunkEvents.CHUNK_LOAD.register(MazefactoryClient::updateChunk);
+
 
         if (configFile.exists() && configFile.isFile()) {
             try {
@@ -71,6 +80,10 @@ public class MazefactoryClient implements ClientModInitializer {
         });
 
         registerCommands();
+
+    }
+
+    private static void updateChunk(ClientLevel level, LevelChunk chunk) {
 
     }
 
