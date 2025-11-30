@@ -1,0 +1,7 @@
+{
+  "key.mazefactory.toggle_render": "Toggle Maze Rendering",
+  "key.mazefactory.toggle_double": "Player Height Map Rendering",
+  "key.mazefactory.toggle_depth_test": "Maze Depth Test Toggle",
+
+  "category.mazefactory.bindings": "MazeFactory Keybinds"
+}
