@@ -61,7 +61,7 @@ public class Maze {
         var x = blockPos.getX();
         var z = blockPos.getZ();
 
-        return (offset.x <= x && x <= offset.x + size.x) && (offset.y <= z && z <= offset.y + size.y);
+        return (offset.x <= x && x < offset.x + size.x) && (offset.y <= z && z < offset.y + size.y);
     }
 
     public Vector2i getTilePosition(BlockPos blockPos) {
