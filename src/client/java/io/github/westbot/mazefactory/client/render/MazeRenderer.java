@@ -55,7 +55,7 @@ public class MazeRenderer {
             .withDepthWrite(false)
             .build();
 
-        WorldRenderEvents.LAST.register(MazeRenderer::render);
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(MazeRenderer::render);
     }
 
     private static void render(WorldRenderContext ctx) {
