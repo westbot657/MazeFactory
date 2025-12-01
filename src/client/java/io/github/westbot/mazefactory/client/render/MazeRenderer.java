@@ -115,7 +115,13 @@ public class MazeRenderer {
                         float ry = fy - (float) camY;
                         float rz = z - (float) camZ;
 
-                        float ry2 = ((float) playerTop.getY()) + 0.05f - ((float) camY);
+                        float topY = (float) playerTop.getY();
+
+                        if (MazefactoryClient.lockHeight) {
+                            topY = MazefactoryClient.targetHeight;
+                        }
+
+                        float ry2 = topY + 0.05f - ((float) camY);
 
                         if (!MazefactoryClient.renderPlayerY || ry2 < ry) {
                             addQuad(rx + 0.5f, ry, rz + 0.5f, half, col);

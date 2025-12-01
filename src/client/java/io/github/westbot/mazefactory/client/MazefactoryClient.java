@@ -12,15 +12,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.*;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -41,12 +37,16 @@ public class MazefactoryClient implements ClientModInitializer {
 
     public static final KeyMapping mazeDepthTestToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.mazefactory.toggle_depth_test", InputConstants.Type.KEYSYM, InputConstants.KEY_X, "category.mazefactory.bindings"));
 
+    public static final KeyMapping mazeHeightLockToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.mazefactory.toggle_height_lock", InputConstants.Type.KEYSYM, InputConstants.KEY_LBRACKET, "category.mazefactory.bindings"));
+
     public static Maze maze;
 
     public static boolean renderMaze = true;
     public static boolean renderPlayerY = true;
     public static boolean mazeDepth = true;
+    public static boolean lockHeight = false;
 
+    public static int targetHeight = 0;
 
     @Override
     public void onInitializeClient() {
@@ -86,6 +86,15 @@ public class MazefactoryClient implements ClientModInitializer {
             if (mazeDualHeightToggle.consumeClick()) {
                 renderPlayerY = !renderPlayerY;
                 while (mazeDualHeightToggle.consumeClick());
+            }
+
+            if (mazeHeightLockToggle.consumeClick()) {
+                lockHeight = !lockHeight;
+                var p = Minecraft.getInstance().player;
+                if (p != null) {
+                    targetHeight = (int) p.getPosition(0).y;
+                }
+                while (mazeHeightLockToggle.consumeClick());
             }
 
         });
